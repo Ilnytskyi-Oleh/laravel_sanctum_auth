@@ -21,4 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::group(['middleware'=>'auth:sanctum'], function (){
     Route::get('/get', 'GetController');
 });
-//Route::get('/get', 'GetController');
+

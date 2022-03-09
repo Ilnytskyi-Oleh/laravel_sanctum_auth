@@ -5271,8 +5271,37 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  name: "Index"
+  name: "Index",
+  data: function data() {
+    return {
+      token: null
+    };
+  },
+  mounted: function mounted() {
+    this.getToken();
+  },
+  updated: function updated() {
+    this.getToken();
+  },
+  methods: {
+    getToken: function getToken() {
+      this.token = localStorage.getItem('x_xsrf_token');
+    },
+    logout: function logout() {
+      var _this = this;
+
+      axios.post('/logout').then(function (res) {
+        localStorage.removeItem('x_xsrf_token');
+
+        _this.$router.push({
+          name: 'user.login'
+        });
+      });
+    }
+  }
 });
 
 /***/ }),
@@ -5310,6 +5339,8 @@ new vue__WEBPACK_IMPORTED_MODULE_2__["default"]({
   \***********************************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
+var router = __webpack_require__(/*! ./router */ "./resources/js/router.js");
+
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 
 try {
@@ -5324,6 +5355,20 @@ try {
 
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.interceptors.response.use({}, function (err) {
+  if (err.response.status === 401 || err.response.status === 419) {
+    var token = localStorage.getItem('x_xsrf_token');
+
+    if (token) {
+      localStorage.removeItem('x_xsrf_token');
+    }
+
+    router.push({
+      name: 'user.login'
+    });
+  }
+});
+axios.defaults.withCredentials = true;
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
@@ -5356,7 +5401,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_0__["default"]);
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vue_router__WEBPACK_IMPORTED_MODULE_0__["default"]({
+var router = new vue_router__WEBPACK_IMPORTED_MODULE_0__["default"]({
   mode: 'history',
   routes: [{
     path: '/get',
@@ -5376,8 +5421,36 @@ vue__WEBPACK_IMPORTED_MODULE_1__["default"].use(vue_router__WEBPACK_IMPORTED_MOD
       return __webpack_require__.e(/*! import() */ "resources_js_components_Registration_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Registration */ "./resources/js/components/Registration.vue"));
     },
     name: 'user.registration'
+  }, {
+    path: '/user/personal',
+    component: function component() {
+      return __webpack_require__.e(/*! import() */ "resources_js_components_Personal_vue").then(__webpack_require__.bind(__webpack_require__, /*! ./components/Personal */ "./resources/js/components/Personal.vue"));
+    },
+    name: 'user.personal'
   }]
-}));
+});
+router.beforeEach(function (to, from, next) {
+  var token = localStorage.getItem('x_xsrf_token');
+
+  if (!token) {
+    if (to.name === 'user.login' || to.name === 'user.registration') {
+      return next();
+    } else {
+      return next({
+        name: 'user.login'
+      });
+    }
+  }
+
+  if (to.name === 'user.login' || to.name === 'user.registration') {
+    return next({
+      name: 'user.personal'
+    });
+  }
+
+  next();
+});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (router);
 
 /***/ }),
 
@@ -27918,17 +27991,45 @@ var render = function () {
   return _c(
     "div",
     [
-      _c("router-link", { attrs: { to: { name: "get.index" } } }, [
-        _vm._v("Get"),
-      ]),
+      _vm.token
+        ? _c("router-link", { attrs: { to: { name: "get.index" } } }, [
+            _vm._v("Get"),
+          ])
+        : _vm._e(),
       _vm._v(" "),
-      _c("router-link", { attrs: { to: { name: "user.login" } } }, [
-        _vm._v("Login"),
-      ]),
+      _vm.token
+        ? _c("router-link", { attrs: { to: { name: "user.personal" } } }, [
+            _vm._v("Personal"),
+          ])
+        : _vm._e(),
       _vm._v(" "),
-      _c("router-link", { attrs: { to: { name: "user.registration" } } }, [
-        _vm._v("Registration"),
-      ]),
+      !_vm.token
+        ? _c("router-link", { attrs: { to: { name: "user.login" } } }, [
+            _vm._v("Login"),
+          ])
+        : _vm._e(),
+      _vm._v(" "),
+      !_vm.token
+        ? _c("router-link", { attrs: { to: { name: "user.registration" } } }, [
+            _vm._v("Registration"),
+          ])
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.token
+        ? _c(
+            "a",
+            {
+              attrs: { href: "#" },
+              on: {
+                click: function ($event) {
+                  $event.preventDefault()
+                  return _vm.logout.apply(null, arguments)
+                },
+              },
+            },
+            [_vm._v("Logout")]
+          )
+        : _vm._e(),
       _vm._v(" "),
       _c("router-view"),
     ],
@@ -42843,7 +42944,7 @@ module.exports = JSON.parse('{"name":"axios","version":"0.21.4","description":"P
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
-/******/ 			if ({"resources_js_components_Get_vue":1,"resources_js_components_Login_vue":1,"resources_js_components_Registration_vue":1}[chunkId]) return "js/" + chunkId + ".js";
+/******/ 			if ({"resources_js_components_Get_vue":1,"resources_js_components_Login_vue":1,"resources_js_components_Registration_vue":1,"resources_js_components_Personal_vue":1}[chunkId]) return "js/" + chunkId + ".js";
 /******/ 			// return url for filenames based on template
 /******/ 			return undefined;
 /******/ 		};
